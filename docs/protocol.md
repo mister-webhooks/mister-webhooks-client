@@ -7,7 +7,11 @@ We built Mister Webhooks out of standard components we chose for interoperabilit
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](https://datatracker.ietf.org/doc/html/rfc2119).
 
 ## Connecting
-Mister Webhooks hosts a Kafka cluster that contains webhook event data for our customers. The Web UI for configuring consumers gives you a file when you create a new consumer, called a consumer profile. The consumer profile file contains all the material you need to connect to a Kafka topic and consume data.
+Mister Webhooks hosts a Kafka cluster that contains webhook event data for our customers.
+
+The Web UI for configuring consumers gives you a file when you create a new consumer, called a consumer profile. The consumer profile file contains all the material you need to connect to our Kafka brokers.
+
+The user will need to provide the name of the Kafka topic to consume from. Each Mister Webhooks endpoint publishes into its own topic, and the Web UI displays the topic name.
 
 ### The Connection Profile Format
 
@@ -19,7 +23,6 @@ Mister Webhooks hosts a Kafka cluster that contains webhook event data for our c
     "secret": "12345-abcde"
   },
   "kafka": {
-    "topic": "incoming.myproject.my-endpoint-name",
     "servers": [
       "b0.mister-webhooks.net.example.com:9092"
     ]
