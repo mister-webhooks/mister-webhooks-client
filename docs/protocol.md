@@ -13,7 +13,7 @@ The Web UI for configuring consumers gives you a file when you create a new cons
 
 The user will need to provide the name of the Kafka topic to consume from. Each Mister Webhooks endpoint publishes into its own topic, and the Web UI displays the topic name.
 
-### The Connection Profile Format
+### The Consumer Profile Format
 
 ```json
 {
