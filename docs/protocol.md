@@ -1,4 +1,4 @@
-# The Mister Webhook Data Plane Protocol
+# The Mister Webhooks Data Plane Protocol
 
 We built Mister Webhooks out of standard components we chose for interoperability. This document specifies what a client must do to interoperate.
 
@@ -9,11 +9,11 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ## Connecting
 Mister Webhooks hosts a Kafka cluster that contains webhook event data for our customers.
 
-The Web UI for configuring consumers gives you a file when you create a new consumer, called a consumer profile. The consumer profile file contains all the material you need to connect to our Kafka brokers.
+The Web UI for configuring consumers gives you a file when you create a new consumer, called a connection profile. The connection profile file contains all the material you need to connect to our Kafka cluster.
 
 The user will need to provide the name of the Kafka topic to consume from. Each Mister Webhooks endpoint publishes into its own topic, and the Web UI displays the topic name.
 
-### The Consumer Profile Format
+### The Connection Profile Format
 
 ```json
 {
