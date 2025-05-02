@@ -4,14 +4,18 @@ import { program } from 'commander';
 import fs from 'node:fs';
 import avro from 'avsc';
 
+type WebhookPayload<T> = {
+  method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "PATCH",
+  payload: T,
+  headers: Map<string, string[]>,
+}
+
 export type WebhookCallback<T> = (parameters: {
   topic: string,
   partition: number,
   offset: bigint,
   key: string,
-  method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "PATCH",
-  headers: Map<string, string[]>,
-  message: T
+  webhook: WebhookPayload<T>,
 }) => void
 
 const KafkaMessageEnvelopeV1Schema = avro.Type.forSchema({
@@ -99,11 +103,6 @@ export class MisterWebhooksConsumer<T> {
   }
 
   async consume(callback: WebhookCallback<T>): Promise<void> {
-    type WebhookPayload<T> = {
-      body: T,
-      headers: Map<string, string[]>,
-    }
-
     const kafka = this.conn.kafka;
 
     this.c = kafka.consumer({ groupId: this.conn.consumerName })
@@ -152,9 +151,11 @@ export class MisterWebhooksConsumer<T> {
               partition: partition,
               offset: BigInt(message.offset),
               key: message.key!.toString(),
-              method: envelope.method,
-              headers: envelope.headers,
-              message: decoded,
+              webhook: {
+                method: envelope.method,
+                headers: envelope.headers,
+                payload: decoded,
+              }
             })
 
             break;
