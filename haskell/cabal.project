@@ -1,0 +1,5 @@
+packages: .
+
+package hw-kafka-client
+  extra-include-dirs: /opt/homebrew/include
+  extra-lib-dirs: /opt/homebrew/lib
