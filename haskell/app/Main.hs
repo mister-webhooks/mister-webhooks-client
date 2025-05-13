@@ -7,16 +7,22 @@
 
 module Main where
 
+import           Control.Monad                   (void)
 import           Control.Monad.IO.Class          (MonadIO (liftIO))
 import qualified Data.Aeson                      as Aeson
 import qualified Data.Text                       as Text
-import           Network.MisterWebhooks.Consumer (ConsumerRecord (..),
+import           Network.MisterWebhooks.Consumer (ConsumerCommand (..),
+                                                  ConsumerRecord (..),
                                                   TopicName (..),
                                                   WebhookHandler (WebhookHandler),
-                                                  runWebhookConsumer)
+                                                  newWebhookConsumer,
+                                                  runWebhookHandler,
+                                                  signalConsumer)
 import           Options.Applicative
-import           System.Exit                     (exitFailure)
+import           System.Exit                     (exitFailure, exitSuccess)
 import           System.IO                       (hPrint, stderr)
+import           System.Posix                    (Handler (Catch),
+                                                  installHandler, sigINT)
 import           Text.Show.Pretty                (pPrint)
 
 data Arguments = Arguments {
@@ -45,10 +51,22 @@ main = do
       hPrint stderr err
       exitFailure
     Right profile -> do
-      runWebhookConsumer
-        profile
-        id
-        topic
-        (WebhookHandler @Aeson.Value \cr@ConsumerRecord{} -> do
-          liftIO $ pPrint cr
-        )
+      newWebhookConsumer profile id topic >>= \case
+        Left err -> do
+          hPrint stderr err
+          exitFailure
+
+        Right consumer -> do
+          void $ installHandler sigINT (Catch $ signalConsumer consumer ConsumerCommandShutdown) Nothing
+
+          mbErr <- runWebhookHandler consumer (
+            WebhookHandler @Aeson.Value \cr@ConsumerRecord{} -> do
+              liftIO $ pPrint cr
+            )
+
+          case mbErr of
+            Nothing  ->
+              exitSuccess
+            Just err -> do
+              hPrint stderr err
+              exitFailure

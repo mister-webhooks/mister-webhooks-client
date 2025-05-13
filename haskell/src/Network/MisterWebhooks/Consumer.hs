@@ -3,17 +3,24 @@
 {-# LANGUAGE StrictData      #-}
 
 module Network.MisterWebhooks.Consumer (
-  runWebhookConsumer,
+  newWebhookConsumer,
+  signalConsumer,
+  ConsumerCommand(..),
+  runWebhookHandler,
   WebhookHandler(..),
   ConsumerError,
   ConsumerRecord(..),
   TopicName(..),
 ) where
-import           Control.Monad                            (forM, forM_, void)
+import           Control.Concurrent.STM                   (TQueue, atomically,
+                                                           newTQueueIO,
+                                                           tryReadTQueue,
+                                                           writeTQueue)
+import           Control.Monad                            (forM, forM_)
 import           Control.Monad.Catch                      (Exception, MonadMask,
-                                                           MonadThrow, bracket,
-                                                           throwM)
-import           Control.Monad.IO.Class                   (MonadIO)
+                                                           MonadThrow,
+                                                           onException, throwM)
+import           Control.Monad.IO.Class                   (MonadIO (..))
 import           Data.Aeson                               (FromJSON)
 import           Data.ByteString                          (StrictByteString)
 import           Data.Text                                (Text)
@@ -27,7 +34,6 @@ import           Kafka.Consumer                           (BatchSize (BatchSize)
                                                            Timeout (Timeout),
                                                            TopicName (..),
                                                            closeConsumer,
-                                                           commitAllOffsets,
                                                            commitOffsetMessage,
                                                            newConsumer,
                                                            pollMessageBatch,
@@ -46,23 +52,40 @@ data ConsumerError = ReceiveError KafkaError | DecodeError TopicName PartitionId
 
 instance Exception ConsumerError
 
-runWebhookConsumer :: forall m t. (MonadIO m, FromJSON t, MonadMask m) => ConnectionProfile -> (ConsumerProperties -> ConsumerProperties) -> TopicName -> WebhookHandler t -> m ()
-runWebhookConsumer profile tweakProperties topicName (WebhookHandler handler) = do
-  bracket
-    (newConsumer (tweakProperties $ toConsumerProperties profile) (topics [topicName]) >>= \case
-      Left kerr -> throwM kerr
-      Right consumer -> return consumer
-    )
-    (void . closeConsumer)
-    loop
+data ConsumerCommand = ConsumerCommandShutdown deriving Show
+data WebhookConsumer = WebhookConsumer {
+  kafkaConsumer :: KafkaConsumer,
+  commandQueue  :: TQueue ConsumerCommand
+}
+
+newWebhookConsumer :: MonadIO io => ConnectionProfile -> (ConsumerProperties -> ConsumerProperties) -> TopicName -> io (Either KafkaError WebhookConsumer)
+newWebhookConsumer profile tweakProperties topicName = do
+  newConsumer (tweakProperties $ toConsumerProperties profile) (topics [topicName]) >>= \case
+    Left kerr -> return (Left kerr)
+    Right kafkaConsumer -> do
+      commandQueue  <- liftIO newTQueueIO
+
+      return $ Right WebhookConsumer{..}
+
+signalConsumer :: MonadIO io => WebhookConsumer -> ConsumerCommand -> io ()
+signalConsumer WebhookConsumer{..} = liftIO . atomically . writeTQueue commandQueue
+
+runWebhookHandler :: forall io t. (MonadIO io, MonadMask io, FromJSON t) => WebhookConsumer -> WebhookHandler t -> io (Maybe KafkaError)
+runWebhookHandler WebhookConsumer{..} (WebhookHandler handler) = do
+  liftIO (atomically (tryReadTQueue commandQueue)) >>= \case
+    Nothing -> do
+      onException (work kafkaConsumer) (closeConsumer kafkaConsumer)
+      runWebhookHandler WebhookConsumer{..} (WebhookHandler handler)
+    Just ConsumerCommandShutdown ->
+      closeConsumer kafkaConsumer
 
   where
-    throwReceiveError :: Either KafkaError a -> m a
+    throwReceiveError :: Either KafkaError a -> io a
     throwReceiveError (Left kerr) = throwM $ ReceiveError kerr
     throwReceiveError (Right a)   = return a
 
-    loop :: KafkaConsumer -> m ()
-    loop consumer = do
+    work :: KafkaConsumer -> io ()
+    work consumer = do
       batch <- mapM throwReceiveError =<< pollMessageBatch consumer (Timeout 10_000) (BatchSize 100)
 
       records <- forM batch $ \msg ->
@@ -86,5 +109,3 @@ runWebhookConsumer profile tweakProperties topicName (WebhookHandler handler) = 
           }
 
         commitOffsetMessage OffsetCommit consumer ConsumerRecord{..}
-
-      loop consumer

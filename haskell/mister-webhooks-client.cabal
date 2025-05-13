@@ -71,6 +71,7 @@ library
     exceptions,
     hw-kafka-client ==5.3.0,
     pretty-show,
+    stm,
     text,
     time,
     vector,
@@ -96,8 +97,10 @@ executable mister-webhooks-client
     mister-webhooks-client,
     optparse-applicative,
     pretty-show,
+    stm,
     text,
     time,
+    unix,
 
   -- Directories containing source files.
   hs-source-dirs: app
