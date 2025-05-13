@@ -49,13 +49,32 @@ library
   -- Import common warning flags.
   import: warnings
   -- Modules exported by the library.
-  exposed-modules: MyLib
+  exposed-modules:
+    Network.MisterWebhooks.ConnectionProfile
+    Network.MisterWebhooks.Consumer
+    Network.MisterWebhooks.MessagePayload
+
   -- Modules included in this library but not exported.
   -- other-modules:
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
   -- Other library packages from which modules are imported.
-  build-depends: base ^>=4.18.3.0
+  build-depends:
+    aeson,
+    avro ==0.6.2.1,
+    base ^>=4.18.3.0,
+    bytestring,
+    cborg,
+    cborg-json,
+    containers,
+    either,
+    exceptions,
+    hw-kafka-client ==5.3.0,
+    pretty-show,
+    text,
+    time,
+    vector,
+
   -- Directories containing source files.
   hs-source-dirs: src
   -- Base language which the package is written in.
@@ -73,21 +92,12 @@ executable mister-webhooks-client
   -- Other library packages from which modules are imported.
   build-depends:
     aeson,
-    avro ==0.6.2.1,
     base ^>=4.18.3.0,
-    bytestring,
-    cborg,
-    cborg-json,
-    containers,
-    either,
-    exceptions,
-    hw-kafka-client ==5.3.0,
     mister-webhooks-client,
+    optparse-applicative,
     pretty-show,
     text,
     time,
-    vector,
-    witness,
 
   -- Directories containing source files.
   hs-source-dirs: app
@@ -100,7 +110,10 @@ test-suite mister-webhooks-client-test
   -- Base language which the package is written in.
   default-language: GHC2021
   -- Modules included in this executable, other than Main.
-  -- other-modules:
+  other-modules:
+    Network.MisterWebhooks.ConnectionProfileSpec
+    Network.MisterWebhooks.MessagePayloadSpec
+
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
   -- The interface type and version of the test suite.
@@ -111,5 +124,16 @@ test-suite mister-webhooks-client-test
   main-is: Main.hs
   -- Test dependencies.
   build-depends:
+    aeson,
+    avro,
     base ^>=4.18.3.0,
+    bytestring,
+    containers,
+    hedgehog,
+    hspec,
+    hspec-discover,
+    hspec-hedgehog,
+    hw-kafka-client ==5.3.0,
     mister-webhooks-client,
+    raw-strings-qq,
+    text,
