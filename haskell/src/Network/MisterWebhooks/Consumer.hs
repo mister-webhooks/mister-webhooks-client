@@ -58,9 +58,9 @@ data WebhookConsumer = WebhookConsumer {
   commandQueue  :: TQueue ConsumerCommand
 }
 
-newWebhookConsumer :: MonadIO io => ConnectionProfile -> (ConsumerProperties -> ConsumerProperties) -> TopicName -> io (Either KafkaError WebhookConsumer)
-newWebhookConsumer profile tweakProperties topicName = do
-  newConsumer (tweakProperties $ toConsumerProperties profile) (topics [topicName]) >>= \case
+newWebhookConsumer :: MonadIO io => ConnectionProfile -> TopicName -> io (Either KafkaError WebhookConsumer)
+newWebhookConsumer profile topicName = do
+  newConsumer (toConsumerProperties profile) (topics [topicName]) >>= \case
     Left kerr -> return (Left kerr)
     Right kafkaConsumer -> do
       commandQueue  <- liftIO newTQueueIO

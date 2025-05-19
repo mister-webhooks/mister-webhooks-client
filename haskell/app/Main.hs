@@ -7,23 +7,28 @@
 
 module Main where
 
-import           Control.Monad                   (void)
-import           Control.Monad.IO.Class          (MonadIO (liftIO))
-import qualified Data.Aeson                      as Aeson
-import qualified Data.Text                       as Text
-import           Network.MisterWebhooks.Consumer (ConsumerCommand (..),
-                                                  ConsumerRecord (..),
-                                                  TopicName (..),
-                                                  WebhookHandler (WebhookHandler),
-                                                  newWebhookConsumer,
-                                                  runWebhookHandler,
-                                                  signalConsumer)
+import           Control.Monad                            (void)
+import           Control.Monad.IO.Class                   (MonadIO (liftIO))
+import qualified Data.Aeson                               as Aeson
+import           Data.Text                                (Text)
+import qualified Data.Text                                as Text
+import           Kafka.Consumer                           (KafkaLogLevel (..))
+import           Network.MisterWebhooks.ConnectionProfile (ConnectionProfileModifier ((#>)))
+import           Network.MisterWebhooks.Consumer          (ConsumerCommand (..),
+                                                           ConsumerRecord (..),
+                                                           TopicName (..),
+                                                           WebhookHandler (WebhookHandler),
+                                                           newWebhookConsumer,
+                                                           runWebhookHandler,
+                                                           signalConsumer)
 import           Options.Applicative
-import           System.Exit                     (exitFailure, exitSuccess)
-import           System.IO                       (hPrint, stderr)
-import           System.Posix                    (Handler (Catch),
-                                                  installHandler, sigINT)
-import           Text.Show.Pretty                (pPrint)
+import           System.Exit                              (exitFailure,
+                                                           exitSuccess)
+import           System.IO                                (hPrint, stderr)
+import           System.Posix                             (Handler (Catch),
+                                                           installHandler,
+                                                           sigINT)
+import           Text.Show.Pretty                         (pPrint)
 
 data Arguments = Arguments {
   topic             :: TopicName,
@@ -50,8 +55,8 @@ main = do
     Left err -> do
       hPrint stderr err
       exitFailure
-    Right profile -> do
-      newWebhookConsumer profile id topic >>= \case
+    Right profile ->
+      newWebhookConsumer (profile #> KafkaLogDebug #> ("debug" :: Text, "all" :: Text)) topic >>= \case
         Left err -> do
           hPrint stderr err
           exitFailure
