@@ -33,9 +33,7 @@ goodJSON = [r|{
     "secret": "12345-abcde"
   },
   "kafka": {
-    "servers": [
-      "b0.mister-webhooks.net.example.com:9092"
-    ]
+    "bootstrap": "b0.mister-webhooks.net.example.com:9092"
   }
 }|]
 
@@ -58,9 +56,7 @@ badTypeBadJSON = [r|{
     "secret": 123
   },
   "kafka": {
-    "servers": [
-      "b0.mister-webhooks.net.example.com:9092"
-    ]
+    "bootstrap": "b0.mister-webhooks.net.example.com:9092"
   }
 }|]
 
@@ -83,7 +79,7 @@ spec = do
                               cpConsumerName = "myproject.foobar",
                               cpAuthMechanism = SASLPlain,
                               cpAuthSecret = "12345-abcde",
-                              cpBrokers = ["b0.mister-webhooks.net.example.com:9092"],
+                              cpBootstrap = "b0.mister-webhooks.net.example.com:9092",
                               cpLogLevel = Nothing,
                               cpProperties = Map.empty
                             }

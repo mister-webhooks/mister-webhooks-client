@@ -1,6 +1,6 @@
 {-# LANGUAGE BlockArguments      #-}
 {-# LANGUAGE LambdaCase          #-}
-{-# LANGUAGE OverloadedStrings   #-}
+-- {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE RecordWildCards     #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData          #-}
@@ -10,7 +10,6 @@ module Main where
 import           Control.Monad                            (void)
 import           Control.Monad.IO.Class                   (MonadIO (liftIO))
 import qualified Data.Aeson                               as Aeson
-import           Data.Text                                (Text)
 import qualified Data.Text                                as Text
 import           Kafka.Consumer                           (KafkaLogLevel (..))
 import           Network.MisterWebhooks.ConnectionProfile (ConnectionProfileModifier ((#>)))
@@ -56,7 +55,7 @@ main = do
       hPrint stderr err
       exitFailure
     Right profile ->
-      newWebhookConsumer (profile #> KafkaLogDebug #> ("debug" :: Text, "all" :: Text)) topic >>= \case
+      newWebhookConsumer (profile #> KafkaLogDebug #> ("debug", "all")) topic >>= \case
         Left err -> do
           hPrint stderr err
           exitFailure

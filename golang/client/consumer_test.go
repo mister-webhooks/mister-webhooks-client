@@ -16,6 +16,27 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const exampleCA = `-----BEGIN CERTIFICATE-----
+MIIDTzCCArCgAwIBAgIBATAKBggqhkjOPQQDAjCBuTEbMBkGA1UEAwwSTWlzdGVy
+IFdlYmhvb2tzIENBMRgwFgYDVQQKDA9NaXN0ZXIgV2ViaG9va3MxFDASBgNVBAsM
+C0VuZ2luZWVyaW5nMQswCQYDVQQIDAJDQTELMAkGA1UEBhMCVVMxFjAUBgNVBAcM
+DVNhbiBGcmFuY2lzY28xODA2BgkqhkiG9w0BCQEWKWNlcnRpZmljYXRlLWF1dGhv
+cml0eUBtaXN0ZXItd2ViaG9va3MuY29tMB4XDTI1MDUxOTE5MzgxNFoXDTM1MDUx
+NzE5MzgxNFowgbkxGzAZBgNVBAMMEk1pc3RlciBXZWJob29rcyBDQTEYMBYGA1UE
+CgwPTWlzdGVyIFdlYmhvb2tzMRQwEgYDVQQLDAtFbmdpbmVlcmluZzELMAkGA1UE
+CAwCQ0ExCzAJBgNVBAYTAlVTMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2NvMTgwNgYJ
+KoZIhvcNAQkBFiljZXJ0aWZpY2F0ZS1hdXRob3JpdHlAbWlzdGVyLXdlYmhvb2tz
+LmNvbTCBmzAQBgcqhkjOPQIBBgUrgQQAIwOBhgAEADBcixtsoeErtv6sMTL4XYRC
+VAz4cXA68ZAIOQi2hTsMyFlOEOnohByH8Q85WreWGT+6jQU9f/CJaB7GMygFXMrY
+ACURCtCKzQLX5szCLZJ1ek57bCIRSyDdENsQoVgDrliubQNQ/5AZH9tSyjWXLlmE
+ENHi/ef+LDj9ZDoMw9TFGomoo2QwYjAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB
+/wQEAwICpDAgBgNVHSUBAf8EFjAUBggrBgEFBQcDAgYIKwYBBQUHAwEwHQYDVR0O
+BBYEFO6W7n09kAegJgvtOHJjX0Gxl4UuMAoGCCqGSM49BAMCA4GMADCBiAJCAW+v
+YzRMnnqB7lHI+AinUviaIiMiQwCuoYJgZtn7h7Ymz3hQcBY6cLZ+BOwCq1OMYHQX
+ocPBOKNkbKx/+2EwLuiMAkIBUt1DYTfSu5NpUddGcJwE7ICNLBthTMxBpdzRPkoV
+1RbvJ87VRibTpsQAYY5x8TwEN2Fa6l47Lk3J0b40lEPSlbg=
+-----END CERTIFICATE-----`
+
 const connectionProfileJSON = `{
 	"consumer_name": "%s",
 	"auth": {
@@ -23,7 +44,8 @@ const connectionProfileJSON = `{
 		"secret": "%s"
 	},
 	"kafka": {
-		"servers": ["%s"]
+		"servers": ["%s"],
+    "certificate_authorities": [%s]
 	}
 }`
 
@@ -34,12 +56,17 @@ func TestLoadConnectionProfile(t *testing.T) {
 
 	defer os.Remove(tmp.Name())
 
+	jsonCA, err := json.Marshal(exampleCA)
+
+	require.NoError(t, err)
+
 	profileData := fmt.Sprintf(
 		connectionProfileJSON,
 		"integration.testing",
 		"plain",
 		"foo-bar-baz",
 		"127.0.0.1:9092",
+		jsonCA,
 	)
 
 	_, err = tmp.Write([]byte(profileData))

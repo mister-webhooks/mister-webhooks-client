@@ -25,7 +25,6 @@ import           Data.Aeson                               (FromJSON)
 import           Data.ByteString                          (StrictByteString)
 import           Data.Text                                (Text)
 import           Kafka.Consumer                           (BatchSize (BatchSize),
-                                                           ConsumerProperties,
                                                            ConsumerRecord (..),
                                                            KafkaConsumer,
                                                            KafkaError, Offset,

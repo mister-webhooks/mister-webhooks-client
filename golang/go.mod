@@ -39,3 +39,5 @@ require (
 )
 
 replace github.com/segmentio/kafka-go v0.4.47 => github.com/jessekempf/kafka-go v0.4.47-jessekempf-p1
+
+replace github.com/jessekempf/mister-kafka v0.0.11 => ../../mister-kafka

@@ -1,6 +1,8 @@
 package client
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,7 +12,26 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/segmentio/kafka-go/sasl"
 	"github.com/segmentio/kafka-go/sasl/plain"
+	// "github.com/segmentio/kafka-go/sasl/plain"
 )
+
+const RootCACert = `-----BEGIN CERTIFICATE-----
+MIICuDCCAmqgAwIBAgIURKmZE5o9LPqEQpU6yahiP+TLwpAwBQYDK2VwMIHHMQsw
+CQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZy
+YW5jaXNjbzEYMBYGA1UECgwPTWlzdGVyIFdlYmhvb2tzMRQwEgYDVQQLDAtFbmdp
+bmVlcmluZzErMCkGA1UEAwwiS2Fma2EgQnJva2VyIENlcnRpZmljYXRlIEF1dGhv
+cml0eTEuMCwGCSqGSIb3DQEJARYfZW5naW5lZXJpbmdAbWlzdGVyLXdlYmhvb2tz
+LmNvbTAeFw0yNTA1MjIwNDA0NTZaFw0zNTA1MjAwNDA0NTZaMIHHMQswCQYDVQQG
+EwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNj
+bzEYMBYGA1UECgwPTWlzdGVyIFdlYmhvb2tzMRQwEgYDVQQLDAtFbmdpbmVlcmlu
+ZzErMCkGA1UEAwwiS2Fma2EgQnJva2VyIENlcnRpZmljYXRlIEF1dGhvcml0eTEu
+MCwGCSqGSIb3DQEJARYfZW5naW5lZXJpbmdAbWlzdGVyLXdlYmhvb2tzLmNvbTAq
+MAUGAytlcAMhAE4/M7Qj1+KNtqGdGF7DgAtO+elzPGDHlyCLz1VCvwi+o2YwZDAd
+BgNVHQ4EFgQUVVOr9w+0L3obSHwAx/3DKG+iKOMwHwYDVR0jBBgwFoAUVVOr9w+0
+L3obSHwAx/3DKG+iKOMwEgYDVR0TAQH/BAgwBgEB/wIBATAOBgNVHQ8BAf8EBAMC
+AQYwBQYDK2VwA0EAZlSOhxGZrIK/gUwB6tOKK3S0gvD7a+SoEEkAYVF44AnwvMe0
+5qzICSe+0sFaqLT0CNf2JQo/PSK06e9Lb7zNCw==
+-----END CERTIFICATE-----`
 
 var validate = validator.New(validator.WithRequiredStructEnabled())
 
@@ -18,7 +39,20 @@ var validate = validator.New(validator.WithRequiredStructEnabled())
 type ConnectionProfile struct {
 	consumerName string
 	auth         sasl.Mechanism
-	brokers      []net.Addr
+	tls          *tls.Config
+	broker       net.Addr
+}
+
+type Hostname struct {
+	str string
+}
+
+func (*Hostname) Network() string {
+	return "tcp"
+}
+
+func (h *Hostname) String() string {
+	return h.str
 }
 
 // LoadConnectionProfile reads a ConnectionProfile from path.
@@ -41,7 +75,7 @@ func LoadConnectionProfile(path string) (*ConnectionProfile, error) {
 			Secret    string `json:"secret"`
 		} `json:"auth"`
 		Kafka struct {
-			Servers []string `json:"servers"`
+			Bootstrap string `json:"bootstrap"`
 		}
 	}{}
 
@@ -75,22 +109,23 @@ func LoadConnectionProfile(path string) (*ConnectionProfile, error) {
 		return nil, fmt.Errorf("'%s' is not a supported auth mechanism", p.Auth.Mechanism)
 	}
 
-	brokers := make([]net.Addr, 0, len(p.Kafka.Servers))
+	rootCAs := x509.NewCertPool()
 
-	for _, addr := range p.Kafka.Servers {
-		broker, err := net.ResolveTCPAddr("tcp", addr)
+	ok := rootCAs.AppendCertsFromPEM(
+		[]byte(RootCACert),
+	)
 
-		if err != nil {
-			return nil, err
-		}
-
-		brokers = append(brokers, broker)
+	if !ok {
+		return nil, fmt.Errorf("error adding RootCA cert")
 	}
 
 	candidate := ConnectionProfile{
 		consumerName: p.ConsumerName,
 		auth:         mechanism,
-		brokers:      brokers,
+		tls: &tls.Config{
+			RootCAs: rootCAs,
+		},
+		broker: &Hostname{p.Kafka.Bootstrap},
 	}
 
 	if err = validate.Struct(candidate); err != nil {

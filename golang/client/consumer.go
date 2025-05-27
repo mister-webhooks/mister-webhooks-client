@@ -17,10 +17,13 @@ type Consumer[T any] struct {
 // NewConsumer creates a new consumer from a provided ConnectionProfile and WebhookTopic.
 func NewConsumer[T any](profile *ConnectionProfile, topic WebhookTopic[T]) (*Consumer[T], error) {
 	c := consumer.NewKafkaConsumer(
-		profile.brokers[0],
+		profile.broker,
 		profile.consumerName,
 		topic.asConsumerTopic(),
-		consumer.WithSASL[misterWebhooksEvent[T]](profile.auth),
+		consumer.WithSecurity[misterWebhooksEvent[T]](
+			profile.auth,
+			profile.tls,
+		),
 		consumer.WithControlChannel[misterWebhooksEvent[T]](
 			consumer.StopOnSignals([]syscall.Signal{syscall.SIGINT}),
 		),
