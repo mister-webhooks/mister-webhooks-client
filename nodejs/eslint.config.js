@@ -4,7 +4,7 @@ import parser from '@typescript-eslint/parser'
 import prettierPlugin from 'eslint-plugin-prettier'
 
 export default [
-  {ignores: ['**/dist/**', '**/node_modules/**']},
+  { ignores: ['**/dist/**', '**/node_modules/**'] },
   js.configs.recommended,
   {
     files: ['**/*.ts'],
