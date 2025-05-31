@@ -1,1 +1,1 @@
-export * from './MisterWebhooksConsumer.js'
+export * from './MisterWebhooksConsumer'

@@ -6,9 +6,9 @@ import {
   Consumer,
   EachMessageHandler,
 } from 'kafkajs'
-import { MessageOffset } from './MessageOffset.js'
-import { decodeMessage } from './decodeMessage.js'
-import { CACERT } from './CACERT.js'
+import { MessageOffset } from './MessageOffset'
+import { decodeMessage } from './decodeMessage'
+import { CACERT } from './CACERT'
 
 export type ConnectionProfileConfig = {
   consumer_name: string
