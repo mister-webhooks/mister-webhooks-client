@@ -13,7 +13,8 @@
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "buildx": "tsup src/index.ts --format cjs,esm --dts",
-    "lint": "eslint src/. --max-warnings 0",
+    "xlint": "eslint src/. --max-warnings 0",
+    "lint": "eslint . --ext .ts",
     "devx": "tsup src/index.ts --format cjs,esm --dts --watch",
     "version": "pnpm version --no-git-tag-version"
   },

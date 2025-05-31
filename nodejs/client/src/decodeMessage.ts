@@ -66,12 +66,12 @@ type DecodeMessageResult<T> = {
   headers: EnvelopeBase['headers']
 }
 
-const decodeCbor = <T>(value: Uint8Array) => {
-  return CBOR.decode(value) as T
+const decodeCbor = (value: Uint8Array) => {
+  return CBOR.decode(value)
 }
 
-const decodeJson = <T>(value: string) => {
-  return JSON.parse(value) as T
+const decodeJson = (value: string): unknown => {
+  return JSON.parse(value)
 }
 
 class MalformedMessageError extends Error {
@@ -81,31 +81,29 @@ class MalformedMessageError extends Error {
   }
 }
 
-export const decodeMessage = <T>(
-  kafkaMessage: KafkaMessage,
-): DecodeMessageResult<T> => {
+export const decodeMessage = <T>(kafkaMessage: KafkaMessage): DecodeMessageResult<T> => {
   if (!kafkaMessage.headers?.envelope) {
     throw new MalformedMessageError("Missing 'envelope' header")
   }
 
-  const envelopeType = kafkaMessage.headers.envelope?.[0]
+  const envelopeType = kafkaMessage.headers.envelope[0]
   if (envelopeType !== KNOWN_ENVELOPE_TYPE) {
-    throw new MalformedMessageError(
-      `Unrecognized envelope type: ${envelopeType}`,
-    )
+    throw new MalformedMessageError(`Unrecognized envelope type: ${envelopeType.toString()}`)
+  }
+
+  if (!kafkaMessage.value) {
+    throw new MalformedMessageError('Invalid message value')
   }
 
   const envelope: EnvelopeV1Message = KafkaMessageEnvelopeV1Schema.fromBuffer(
-    kafkaMessage.value!,
-  )
+    kafkaMessage.value
+  ) as EnvelopeV1Message
 
-  const decoded: T =
-    envelope.encoding === 'CBOR'
-      ? decodeCbor<T>(envelope.payload)
-      : decodeJson<T>(envelope.payload)
+  const payload =
+    envelope.encoding === 'CBOR' ? decodeCbor(envelope.payload) : decodeJson(envelope.payload)
 
   return {
-    decoded,
+    decoded: payload as T,
     headers: envelope.headers,
     method: envelope.method,
   }

@@ -5,5 +5,5 @@
     "emitDeclarationOnly": true,
     "noEmit": false
   },
-  "include": ["src"]
+  "include": ["**/*.ts"]
 }

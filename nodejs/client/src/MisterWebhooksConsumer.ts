@@ -31,9 +31,7 @@ type MessagePayload<T> = {
   message: T
 }
 
-export type MessageProcessor<T = unknown> = (
-  parameters: MessagePayload<T>,
-) => Promise<void>
+export type MessageProcessor<T = unknown> = (parameters: MessagePayload<T>) => Promise<void>
 
 export const MISTER_WEBHOOKS_EVENT = {
   CONNECTED: 'mrw.connected',
@@ -43,8 +41,7 @@ export const MISTER_WEBHOOKS_EVENT = {
   ERROR: 'mrw.error',
 } as const
 
-export type ConsumerEvent =
-  (typeof MISTER_WEBHOOKS_EVENT)[keyof typeof MISTER_WEBHOOKS_EVENT]
+export type ConsumerEvent = (typeof MISTER_WEBHOOKS_EVENT)[keyof typeof MISTER_WEBHOOKS_EVENT]
 
 type ExposedEvents = {
   [MISTER_WEBHOOKS_EVENT.CONNECTED]: []
@@ -68,13 +65,7 @@ export class MisterWebhooksConsumer<T> extends EventEmitter<ExposedEvents> {
   private readonly handler: MessageProcessor<T>
   private startPromise: Promise<void> | undefined
 
-  constructor({
-    config,
-    topic,
-    handler,
-    manualStart,
-    logLevel,
-  }: MisterWebhooksConsumerOptions<T>) {
+  constructor({ config, topic, handler, manualStart, logLevel }: MisterWebhooksConsumerOptions<T>) {
     super()
     this.topic = topic
     this.handler = handler
@@ -114,22 +105,18 @@ export class MisterWebhooksConsumer<T> extends EventEmitter<ExposedEvents> {
     })
 
     if (!manualStart) {
-      this.start()
+      void this.start()
     }
   }
 
-  private handleMessage: EachMessageHandler = async ({
-    topic,
-    message,
-    partition,
-  }) => {
+  private handleMessage: EachMessageHandler = async ({ topic, message, partition }) => {
     const decodeResult = decodeMessage<T>(message)
     const { decoded, headers, method } = decodeResult
     await this.handler({
       topic,
       partition,
       offset: MessageOffset.fromString(message.offset),
-      key: message.key!.toString(),
+      key: message.key?.toString() ?? 'none',
       method,
       headers,
       message: decoded,

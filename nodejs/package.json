@@ -1,5 +1,6 @@
 {
   "name": "nodejs-sdk-monorepo",
+  "type": "module",
   "private": true,
   "workspaces": [
     "sdk",
@@ -12,7 +13,13 @@
     "test": "turbo run test"
   },
   "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "@typescript-eslint/eslint-plugin": "^8.33.0",
+    "@typescript-eslint/parser": "^8.33.0",
     "eslint": "^9.28.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.1",
+    "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"
