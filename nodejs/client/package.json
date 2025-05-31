@@ -1,0 +1,40 @@
+{
+  "name": "@mister-webhooks/client",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lintx": "eslint src --ext .ts",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "buildx": "tsup src/index.ts --format cjs,esm --dts",
+    "lint": "eslint src/. --max-warnings 0",
+    "devx": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "version": "pnpm version --no-git-tag-version"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "eslint": "^9.27.0",
+    "tsup": "^8.5.0",
+    "typescript": "latest"
+  },
+  "dependencies": {
+    "avsc": "^5.7.7",
+    "cbor2": "^2.0.0",
+    "kafkajs": "^2.2.4"
+  }
+}
