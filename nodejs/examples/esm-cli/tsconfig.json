@@ -3,8 +3,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "moduleResolution": "node16",
-    "module": "Node16",          
-    "target": "es2020",          
+    "module": "Node16",
+    "target": "es2020",
     "types": ["node"]
   },
   "include": ["cli.ts"]
