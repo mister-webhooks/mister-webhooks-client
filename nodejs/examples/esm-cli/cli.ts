@@ -90,16 +90,9 @@ consumer.on('mrw.disconnected', () => {
 consumer.on('mrw.stopped', () => {
   console.log('stopped')
 })
+
 consumer.on('mrw.error', (err: unknown) => {
-  console.log('error sdsdfdsfsfdfsdfsfdsfsdfs', err)
+  console.error('error', err)
 })
 
-const delay = (seconds = 2) =>
-  new Promise((resolve) => {
-    setTimeout(resolve, seconds * 1000)
-  })
-
-console.log('starting delay')
-await delay(5)
-console.log('done with delay')
 consumer.start()
