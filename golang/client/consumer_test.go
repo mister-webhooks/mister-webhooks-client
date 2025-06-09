@@ -10,8 +10,8 @@ import (
 
 	"github.com/fxamacker/cbor/v2"
 	"github.com/hamba/avro/v2"
-	"github.com/mister-webhooks/mister-webhooks-client/client"
-	"github.com/segmentio/kafka-go"
+	"github.com/jessekempf/kafka-go"
+	"github.com/mister-webhooks/mister-webhooks-client/golang/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

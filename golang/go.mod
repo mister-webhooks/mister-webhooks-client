@@ -1,14 +1,13 @@
-module github.com/mister-webhooks/mister-webhooks-client
+module github.com/mister-webhooks/mister-webhooks-client/golang
 
 go 1.23.0
 
 toolchain go1.24.1
 
-require github.com/jessekempf/mister-kafka v0.0.12
-
 require (
 	github.com/davecgh/go-spew v1.1.1
-	github.com/segmentio/kafka-go v0.4.47
+	github.com/jessekempf/kafka-go v0.4.47-jessekempf-p3
+	github.com/jessekempf/mister-kafka v0.0.13
 	github.com/stretchr/testify v1.10.0
 )
 
@@ -23,10 +22,10 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	golang.org/x/crypto v0.33.0 // indirect
-	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
@@ -37,5 +36,3 @@ require (
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 )
-
-replace github.com/segmentio/kafka-go v0.4.47 => github.com/jessekempf/kafka-go v0.4.47-jessekempf-p1

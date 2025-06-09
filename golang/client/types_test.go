@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mister-webhooks/mister-webhooks-client/client"
+	"github.com/mister-webhooks/mister-webhooks-client/golang/client"
 	"github.com/stretchr/testify/assert"
 )
 
