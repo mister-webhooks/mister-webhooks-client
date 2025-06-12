@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/segmentio/kafka-go/sasl"
-	"github.com/segmentio/kafka-go/sasl/plain"
+	"github.com/jessekempf/kafka-go/sasl"
+	"github.com/jessekempf/kafka-go/sasl/plain"
 )
 
 const RootCACert = `-----BEGIN CERTIFICATE-----

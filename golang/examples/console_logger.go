@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/mister-webhooks/mister-webhooks-client/client"
+	"github.com/mister-webhooks/mister-webhooks-client/golang/client"
 )
 
 func main() {

@@ -6,8 +6,8 @@ import (
 
 	"github.com/fxamacker/cbor/v2"
 	"github.com/hamba/avro/v2"
+	"github.com/jessekempf/kafka-go"
 	mrkCore "github.com/jessekempf/mister-kafka/core"
-	"github.com/segmentio/kafka-go"
 )
 
 // A WebhookTopic names a Kafka topic that contains a log of webhook events.

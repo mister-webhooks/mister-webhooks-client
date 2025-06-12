@@ -4,9 +4,9 @@ import (
 	"context"
 	"syscall"
 
+	"github.com/jessekempf/kafka-go"
 	mrkConsumer "github.com/jessekempf/mister-kafka/consumer"
 	mrkCore "github.com/jessekempf/mister-kafka/core"
-	"github.com/segmentio/kafka-go"
 )
 
 // A Consumer reads incoming webhook events and passes them to a supplied handler function.
