@@ -1,0 +1,60 @@
+{
+  "name": "@mister-webhooks/client",
+  "version": "0.0.4-beta.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.mjs"
+    },
+    "require": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "format": "prettier src/ --check",
+    "format:write": "prettier src/ --write",
+    "lint": "eslint . --ext .ts",
+    "version": "pnpm version --no-git-tag-version",
+    "prepublishOnly": "pnpm run lint && pnpm run build",
+    "preversion": "pnpm run lint && pnpm run format",
+    "postversion": "git add package.json && git commit -m \"chore: bump client version to v$(node -p 'require(\"./package.json\").version')\" && git tag -a v$(node -p 'require(\"./package.json\").version') -m \"Release v$(node -p 'require(\"./package.json\").version')\"",
+    "release:beta": "pnpm version prerelease --preid beta",
+    "release:patch": "pnpm version patch",
+    "release:minor": "pnpm version minor",
+    "release:major": "pnpm version major",
+    "publish:beta": "pnpm publish --tag beta",
+    "publish:release": "pnpm publish"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "@types/node": "^24.0.1",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
+    "eslint": "^9.28.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.1",
+    "prettier": "^3.5.3",
+    "tsup": "^8.5.0",
+    "typescript": "latest"
+  },
+  "dependencies": {
+    "avsc": "^5.7.7",
+    "cbor2": "^2.0.0",
+    "kafkajs": "^2.2.4"
+  },
+  "packageManager": "pnpm@10.12.1+sha512.f0dda8580f0ee9481c5c79a1d927b9164f2c478e90992ad268bbb2465a736984391d6333d2c327913578b2804af33474ca554ba29c04a8b13060a717675ae3ac"
+}
