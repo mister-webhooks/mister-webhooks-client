@@ -13,3 +13,11 @@ Additionally, the Mister Webhooks data plane uses standard components chosen for
 ```bash
 $ go get -u github.com/mister-webhooks/mister-webhooks-client
 ```
+
+## NodeJS
+
+### Installation
+
+```bash
+$ npm install @mister-webhooks/client
+```
