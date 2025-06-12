@@ -4,8 +4,6 @@ import { KafkaMessage } from 'kafkajs'
 
 type EnvelopeBase = {
   method: 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
-  // TODO: discuss w/Jesse... I don't think this is a map. changed to
-  // record.
   headers: Record<string, string[]>
 }
 
@@ -83,12 +81,19 @@ class MalformedMessageError extends Error {
 
 export const decodeMessage = <T>(kafkaMessage: KafkaMessage): DecodeMessageResult<T> => {
   if (!kafkaMessage.headers?.envelope) {
-    throw new MalformedMessageError("Missing 'envelope' header")
+    throw new MalformedMessageError("malformed Kafka message, 'envelope' header is missing")
   }
 
   const envelopeType = kafkaMessage.headers.envelope[0]
-  if (envelopeType !== KNOWN_ENVELOPE_TYPE) {
-    throw new MalformedMessageError(`Unrecognized envelope type: ${envelopeType.toString()}`)
+  if (typeof envelopeType !== 'number') {
+    const typeName = typeof envelopeType === 'string' ? 'string' : 'Buffer'
+    throw new MalformedMessageError(
+      `expected 'envelope' header to be single byte, got ${typeName} instead`
+    )
+  } else if (envelopeType > KNOWN_ENVELOPE_TYPE) {
+    throw new MalformedMessageError(
+      `envelope type ${envelopeType.toString()} is unsupported, please upgrade mister-webhooks-client`
+    )
   }
 
   if (!kafkaMessage.value) {
