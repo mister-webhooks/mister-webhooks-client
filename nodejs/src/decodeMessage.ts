@@ -62,7 +62,7 @@ type DecodeMessageResult<T> = {
   decoded: T
   method: EnvelopeBase['method']
   headers: EnvelopeBase['headers']
-}
+} | null
 
 const decodeCbor = (value: Uint8Array) => {
   return CBOR.decode(value)
@@ -90,10 +90,16 @@ export const decodeMessage = <T>(kafkaMessage: KafkaMessage): DecodeMessageResul
     throw new MalformedMessageError(
       `expected 'envelope' header to be single byte, got ${typeName} instead`
     )
-  } else if (envelopeType > KNOWN_ENVELOPE_TYPE) {
+  }
+
+  if (envelopeType > KNOWN_ENVELOPE_TYPE) {
     throw new MalformedMessageError(
       `envelope type ${envelopeType.toString()} is unsupported, please upgrade mister-webhooks-client`
     )
+  }
+
+  if (envelopeType < KNOWN_ENVELOPE_TYPE) {
+    return null
   }
 
   if (!kafkaMessage.value) {

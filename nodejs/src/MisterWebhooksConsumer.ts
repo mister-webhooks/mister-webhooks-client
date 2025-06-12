@@ -119,6 +119,9 @@ export class MisterWebhooksConsumer<MessageType> extends EventEmitter<ExposedEve
 
   private handleMessage: EachMessageHandler = async ({ topic, message, partition }) => {
     const decodeResult = decodeMessage<MessageType>(message)
+    if (!decodeResult) {
+      return
+    }
     const { decoded, headers, method } = decodeResult
     await this.handler({
       topic,
