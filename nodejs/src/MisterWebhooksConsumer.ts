@@ -53,6 +53,8 @@ type ExposedEvents = {
   [MISTER_WEBHOOKS_EVENT.ERROR]: [unknown]
 }
 
+export type StartPoint = EpochTimeStamp | "EARLIEST" | "LAST_PROCESSED"
+
 export type MisterWebhooksConsumerOptions<MessageType> = {
   config: ConnectionProfileConfig
   topic: string
@@ -62,6 +64,8 @@ export type MisterWebhooksConsumerOptions<MessageType> = {
 }
 
 export class MisterWebhooksConsumer<MessageType> extends EventEmitter<ExposedEvents> {
+  private readonly kafka: Kafka
+  private readonly config: ConnectionProfileConfig
   private readonly consumer: Consumer
   private readonly topic: string
   private readonly handler: MessageProcessor<MessageType>
@@ -78,7 +82,9 @@ export class MisterWebhooksConsumer<MessageType> extends EventEmitter<ExposedEve
     this.topic = topic
     this.handler = handler
 
-    const kafka = new Kafka({
+    this.config = config
+
+    this.kafka = new Kafka({
       clientId: config.consumer_name,
       brokers: [config.kafka.bootstrap],
       ssl: {
@@ -92,7 +98,7 @@ export class MisterWebhooksConsumer<MessageType> extends EventEmitter<ExposedEve
       logLevel,
     })
 
-    this.consumer = kafka.consumer({
+    this.consumer = this.kafka.consumer({
       groupId: config.consumer_name,
     })
 
@@ -145,6 +151,21 @@ export class MisterWebhooksConsumer<MessageType> extends EventEmitter<ExposedEve
     } catch (err) {
       this.emit('mrw.error', err)
     }
+  }
+
+  startFrom = (startPoint: StartPoint): Promise<void> => {
+    switch (startPoint) {
+      case "EARLIEST":
+        const admin = this.kafka.admin()
+        await admin.connect()
+        await admin.resetOffsets({ groupId: this.config.consumer_name, topic: this.topic, earliest: true })
+        await admin.disconnect()
+        console.info(`reset ${this.config.consumer_name} offsets to earliest on ${this.topic}`)
+      case "LAST_PROCESSED":
+
+      case (startTime: EpochTimeStamp):
+    }
+    return this.start()
   }
 
   start = (): Promise<void> => {
