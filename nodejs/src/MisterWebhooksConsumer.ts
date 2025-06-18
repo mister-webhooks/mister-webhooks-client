@@ -53,19 +53,25 @@ type ExposedEvents = {
   [MISTER_WEBHOOKS_EVENT.ERROR]: [unknown]
 }
 
+export type StartPoint = Date | 'EARLIEST' | 'LAST_PROCESSED'
+
 export type MisterWebhooksConsumerOptions<MessageType> = {
   config: ConnectionProfileConfig
   topic: string
   handler: MessageProcessor<MessageType>
+  startPoint?: StartPoint
   manualStart?: boolean
   logLevel?: LogLevel
 }
 
 export class MisterWebhooksConsumer<MessageType> extends EventEmitter<ExposedEvents> {
+  private readonly kafka: Kafka
+  private readonly config: ConnectionProfileConfig
   private readonly consumer: Consumer
   private readonly topic: string
   private readonly handler: MessageProcessor<MessageType>
   private startPromise: Promise<void> | undefined
+  private readonly startPoint: StartPoint
 
   constructor({
     config,
@@ -73,12 +79,16 @@ export class MisterWebhooksConsumer<MessageType> extends EventEmitter<ExposedEve
     handler,
     manualStart,
     logLevel,
+    startPoint,
   }: MisterWebhooksConsumerOptions<MessageType>) {
     super()
     this.topic = topic
     this.handler = handler
+    this.startPoint = startPoint ?? 'LAST_PROCESSED'
 
-    const kafka = new Kafka({
+    this.config = config
+
+    this.kafka = new Kafka({
       clientId: config.consumer_name,
       brokers: [config.kafka.bootstrap],
       ssl: {
@@ -92,7 +102,7 @@ export class MisterWebhooksConsumer<MessageType> extends EventEmitter<ExposedEve
       logLevel,
     })
 
-    this.consumer = kafka.consumer({
+    this.consumer = this.kafka.consumer({
       groupId: config.consumer_name,
     })
 
@@ -137,13 +147,38 @@ export class MisterWebhooksConsumer<MessageType> extends EventEmitter<ExposedEve
   private startInternal = async () => {
     try {
       await this.consumer.connect()
+      if (this.startPoint !== 'LAST_PROCESSED') {
+        await this.adjustStartPoint()
+      }
+
       await this.consumer.subscribe({
         topic: this.topic,
+        // this defines what to use if the offset is invalid or not specified... not 100% sure how this applies
+        // in the case that we're specifying the offset
         fromBeginning: true,
       })
       await this.consumer.run({ eachMessage: this.handleMessage })
     } catch (err) {
       this.emit('mrw.error', err)
+    }
+  }
+
+  private adjustStartPoint = async () => {
+    const admin = this.kafka.admin()
+    const groupId = this.config.consumer_name
+    const topic = this.topic
+    if (this.startPoint === 'EARLIEST') {
+      await admin.resetOffsets({
+        groupId,
+        topic,
+        earliest: true,
+      })
+    } else if (this.startPoint instanceof Date) {
+      await admin.setOffsets({
+        groupId,
+        topic,
+        partitions: await admin.fetchTopicOffsetsByTimestamp(topic, this.startPoint.valueOf()),
+      })
     }
   }
 
