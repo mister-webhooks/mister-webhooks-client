@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling >= 1.26", "setuptools>=40.8.0", "wheel"]
+build-backend = "hatchling.build"
+
+[project]
+dynamic = ["version"]
+name = "mister_webhooks"
+authors = [{ name = "Jesse Kempf", email = "jesse@mister-webhooks.com" }]
+description = "Python client for Mister Webhooks"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+license = "BSD-2-Clause"
+license-files = ["LICEN[CS]E*"]
+dependencies = ["kafka-python == 2.2.15", "avro == 1.11.3", "cbor2 == 5.6.5"]
+
+[project.urls]
+Homepage = "https://github.com/mister-webhooks/mister-webhooks-client"
+Issues = "https://github.com/mister-webhooks/mister-webhooks-client/issues"
+
+[tool.hatch.version]
+path = ".about.py"
