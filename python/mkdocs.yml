@@ -1,0 +1,9 @@
+site_name: "Mister Webbooks Python SDK"
+
+theme:
+  name: "material"
+
+plugins:
+- search
+- mkdocstrings
+
