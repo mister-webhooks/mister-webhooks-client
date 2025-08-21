@@ -4,4 +4,8 @@ Mister Webhooks is a service to help you consume webhook events without having t
 
 ## API Documentation
 
-API documentation is [on Github](https://mister-webhooks.github.io/mister-webhooks-client/docs/python/).
+API documentation is [available online](https://mister-webhooks-client-python.readthedocs.io/en/latest/).
+
+## Get the package
+
+The package is [hosted on PyPI](https://pypi.org/project/mister-webhooks/).
