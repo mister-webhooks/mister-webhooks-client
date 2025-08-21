@@ -21,3 +21,9 @@ $ go get -u github.com/mister-webhooks/mister-webhooks-client
 ```bash
 $ npm install @mister-webhooks/client
 ```
+
+## Python
+
+API documentation is [available online](https://mister-webhooks-client-python.readthedocs.io/en/latest/).
+
+The package is [hosted on PyPI](https://pypi.org/project/mister-webhooks/).
