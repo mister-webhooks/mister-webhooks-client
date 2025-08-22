@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+require "mister_webhooks"
+require "awesome_print"
+
+consumer = MisterWebhooks::Consumer.new(MisterWebhooks::ConnectionProfile.from_file(ARGV[0]), ARGV[1])
+
+consumer.consume do |event|
+  ap event
+end
